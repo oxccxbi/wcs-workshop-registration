@@ -12,6 +12,6 @@ enum SheetIds {
   PARAMETERS = "Parametre"
 };
 
-function getSheet(sheet) {
+function getSheet(sheet: string) {
   return SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheet);
 }
