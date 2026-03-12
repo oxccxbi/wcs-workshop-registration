@@ -4,14 +4,14 @@ function sendEmail(
   body: string,
   options: GoogleAppsScript.Gmail.GmailAdvancedOptions = {}
 ) {
-  const emailEnabled = true
   if (emailEnabled) {
     Logger.log(`Sending email
 ${recipient}
 ${title}
 ${body}`)
     GmailApp.sendEmail(recipient, title, body, {
-      name: "NTNUI Dance WCS",
+      name: emailSender,
+      replyTo: replyEmailAddress,
       ...options
     })
   } else {
@@ -21,6 +21,10 @@ ${title}
 ${body}`)
   }
 }
+
+
+const emailSender = "NTNUI Dance WCS"
+
 
 function emailTitle(type: string) {
   return `NTNUI Dance WCS Workshop Registration - ${type}`
