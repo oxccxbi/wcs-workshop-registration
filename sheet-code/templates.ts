@@ -30,53 +30,76 @@ function emailTitle(type: string) {
   return `NTNUI Dance WCS Workshop Registration - ${type}`
 }
 
-function emailBody(body: string) {
-  return `${body}
 
-
+const emailClosure = `
 Best regards,
-NTNUI Dance WCS`
-}
-
-const firstGreeting = "Hi, and thanks for signing up for our workshop!"
-
-/** Waiting list message */
-const waitingListBody = () => `${firstGreeting}
-
-To ensure balance between roles in the classes, we have had to put in place a waiting list. Unfortunately, you have been put on this waiting list.
-
-We will send you a new email once enough people of the opposite role have signed up that you are taken off the waiting list. Alternatively, you can get someone of the opposite role to write your name in the partner field when signing up. You will then immediately move past the waiting list.`
+${emailSender}`
 
 
-/** Body text for payment info */
-const paymentInfo = (price: number) => `${firstGreeting}
+/**  Body text for waiting list */
+const waitingListBody = (name: string) => `Hi ${name} and thank you for signing up for our workshop!
 
-You have received a spot. To complete your registration, we just need your payment. Payment must be done within 24 hours after receiving this email, or your spot may be given to the next person on the waiting list.
+To ensure balance between roles in the classes and not exceed the room capacities, we have had to put in place a waiting list. Unfortunately, you have been put on this waiting list.
 
-We prefer payment by Vipps. If you can not pay by Vipps, contact us and we'll work something out.
-
-Vipps number: 746109 (NTNUi Dans > NTNUI West Coast Swing Kurs)
-
-Price: ${price} NOK
-
-After paying, please reply to this email with a screenshot of the Vipps receipt.`
+We will send you a new email once enough people of the opposite role have signed up or a spot in the classes has been freed that you are taken off the waiting list. Alternatively, you can get someone of the opposite role to write your name in the partner field when signing up. You will then immediately move past the waiting list if the room capacity has not been reached yet.
+${emailClosure}`
 
 
 /** Body text for payment info */
-const paymentInfoAfterWaiting = (price: number) => `A spot has opened up for you! To complete your registration, we just need your payment. Payment must be done within 24 hours after receiving this email, or your spot may be given to the next person on the waiting list.
+const paymentInfoBody = (name: string, price: number, role: Role) => `Hi ${name} and thank you for signing up for our workshop!
 
-We prefer payment by Vipps. If you can not pay by Vipps, contact us and we'll work something out.
+We're pleased to inform you, that you have received a ${role.toLowerCase()} spot at the workshop.
+${paymentInfo(price)}
+${emailClosure}`
 
-Vipps number: 746109 (NTNUi Dans > NTNUI West Coast Swing Kurs)
+
+/** Body text for payment info after waiting list */
+const paymentInfoAfterWaitingBody = (name: string, price: number, role: Role) => `Hi again ${name}!
+
+We're pleased to inform you, that you are no longer on the waiting list and have received a ${role.toLowerCase()} spot at the workshop.
+${paymentInfo(price)}
+${emailClosure}`
+
+
+/** Body text for partner signup */
+const partnerSignupBody = (name: string) => `Hi ${name} and thank you for signing up for our workshop!
+
+There is a waiting list, but since you signed up with a partner, you will skip the waiting list as soon as we have confirmed your partner's registration.
+
+Please note that it is necessary that your partner registers as well, otherwise we cannot complete your registration.
+${emailClosure}`
+
+
+/** Body text for payment info after partner signup */
+const paymentInfoAfterPartnerBody = (name: string, price: number, role: Role) => `Hi again ${name}!
+
+We're pleased to inform you, that your dance partner has signed up and you have received a ${role.toLowerCase()} spot at the workshop.
+${paymentInfo(price)}
+${emailClosure}`
+
+
+/** Body text for payment confirmation */
+const paymentConfirmationBody = (name: string) => `Hi again ${name}!
+
+We have confirmed your payment, and your registration is now complete. We look forward to seeing you!
+${emailClosure}`
+
+
+/** Body text for cancellation */
+const cancellationBody = (name: string) => `Hi ${name}!
+
+We have processed your cancellation, and your registration is now cancelled. We hope to see you at another event in the future!
+${emailClosure}`
+
+
+/** Payment info */
+const paymentInfo = (price: number) => `
+To secure your spot, please complete your registration by making the payment within 48 hours after receiving this email. Otherwise, we may offer your spot to the next person on the waiting list.
+
+We prefer payment by Vipps. If you don't have the option to pay by Vipps, contact us and we can arrange payment by card or cash during the workshop.
+
+Vipps: 129012 (NTNUI Dans) -> Workshop WCS
 
 Price: ${price} NOK
 
-After paying, please reply to this email with a screenshot of the Vipps receipt.`
-
-/** The subject wrote something in the partner field */
-const SUBJECT_CLAIMS_PARTNER = firstGreeting
-  + "\n\n"
-  + "There is a waiting list, but since you signed up with a partner, you will skip "
-  + "the waiting list as soon as we have confirmed your partner's registration. "
-  + "Please note that it is necessary that your partner registers as well, "
-  + "otherwise we cannot complete your registration."
+After paying, please reply to this email with a screenshot of the Vipps receipt. If screenshots don't work in Vipps, this receipt can also be exported with the "Share" button (upper right corner).`

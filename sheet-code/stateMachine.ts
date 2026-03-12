@@ -81,7 +81,7 @@ abstract class BaseState implements FsmState {
         sendEmail(
             this.stateRow.email,
             emailTitle("Cancellation"),
-            emailBody("Your registration has been cancelled.")
+            cancellationBody(this.stateRow.name)
         )
     }
 
@@ -104,7 +104,7 @@ class NewState extends BaseState {
                 sendEmail(
                     this.stateRow.email,
                     emailTitle("Partner confirmation"),
-                    emailBody(SUBJECT_CLAIMS_PARTNER)
+                    partnerSignupBody(this.stateRow.name)
                 )
             } else {
                 // This person's name was listed as someone else's partner.
@@ -120,13 +120,14 @@ class NewState extends BaseState {
             sendEmail(
                 this.stateRow.email,
                 emailTitle("Waiting list"),
-                emailBody(waitingListBody())
+                waitingListBody(this.stateRow.name)
             )
         }
         if (newState.stateName == "AWAITING_PAYMENT") {
-            sendPaymentInfo(
+            sendEmail(
                 this.stateRow.email,
-                this.stateRow.price
+                emailTitle("Payment information"),
+                paymentInfoBody(this.stateRow.name, this.stateRow.price, this.stateRow.role)
             )
         }
         newState.save()
@@ -134,19 +135,15 @@ class NewState extends BaseState {
     }
 }
 
-function sendPaymentInfo(address: string, price: number) {
-    sendEmail(
-        address,
-        emailTitle("Payment information"),
-        emailBody(paymentInfo(price))
-    )
-}
-
 
 const confirmPartner = (fsm: FsmState) => {
     Logger.log("Partner confirmed", fsm)
     const newState = new AwaitingPaymentState(fsm.stateRow)
-    sendPaymentInfo(fsm.stateRow.email, fsm.stateRow.price)
+    sendEmail(
+        fsm.stateRow.email,
+        emailTitle("Payment information"),
+        paymentInfoAfterPartnerBody(fsm.stateRow.name, fsm.stateRow.price, fsm.stateRow.role)
+    )
     newState.save()
 }
 
@@ -167,7 +164,11 @@ class WaitingListState extends BaseState {
         Logger.log("Reevaluating waiting list", this)
         const newState = evaluateNewState(this)
         if (newState.stateName == "AWAITING_PAYMENT") {
-            sendPaymentInfo(this.stateRow.email, this.stateRow.price)
+            sendEmail(
+                this.stateRow.email,
+                emailTitle("Payment information"),
+                paymentInfoAfterWaitingBody(this.stateRow.name, this.stateRow.price, this.stateRow.role)
+            )
         }
         newState.save()
         return newState
@@ -184,7 +185,7 @@ class AwaitingPaymentState extends BaseState {
         sendEmail(
             this.stateRow.email,
             emailTitle("Registration complete"),
-            emailBody("We have received your payment, and your registration is now complete. We look forward to seeing you!")
+            paymentConfirmationBody(this.stateRow.name)
         )
         newState.save()
     }
