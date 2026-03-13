@@ -33,10 +33,32 @@ function parseStateRow(row: any[]): StateRow | undefined {
 }
 
 function computePrice(membership: Membership, pass: WsPass): number {
-    const MEMBER_PRICE = 100
-    const REGULAR_PRICE = 150
-    const pricePerClass = membership !== "Member" ? REGULAR_PRICE : MEMBER_PRICE
-    return  pass === "LEVEL_1" ? pricePerClass : pricePerClass*2
+    switch (membership) {
+        case "Member":
+            switch (pass) {
+                case "LEVEL_1": return 300;
+                case "LEVEL_2": return 350;
+                case "PARTY_1": return 50;
+                case "PARTY_2": return 85;
+            }
+            break;
+        case "Student":
+            switch (pass) {
+                case "LEVEL_1": return 400;
+                case "LEVEL_2": return 450;
+                case "PARTY_1": return 50;
+                case "PARTY_2": return 85;
+            }
+            break;
+        case "Regular":
+            switch (pass) {
+                case "LEVEL_1": return 700;
+                case "LEVEL_2": return 750;
+                case "PARTY_1": return 100;
+                case "PARTY_2": return 170;
+            }
+            break;
+    }
 }
 
 function signupToState(signup: SignupRow): StateRow {
@@ -45,8 +67,12 @@ function signupToState(signup: SignupRow): StateRow {
         return passNameToType[rawPass] as WsPass;
     }
 
+    const parseRole =(rawRole: string= "") => {
+        return (rawRole === "") ? "Party" : rawRole as Role;
+    }
+
     const pass = parsePass(signup.pass)
-    const role = signup.role as Role;
+    const role = parseRole(signup.role);
     const membership = signup.membership as Membership;
 
     return {

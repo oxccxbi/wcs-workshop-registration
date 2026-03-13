@@ -6,7 +6,7 @@ interface SignupRow {
   lastname: string,
   membership: string,
   pass: string,
-  role: string,
+  role?: string,
   partner?: string,
 }
 
@@ -28,7 +28,7 @@ interface StateRow {
   reevaluate: boolean
 }
 
-type Role = "Leader" | "Follower"
+type Role = "Leader" | "Follower" | "Party"
 
 type State = "NEW"
   | "PARTNER_SIGNUP"
@@ -37,14 +37,16 @@ type State = "NEW"
   | "CANCELLED"
   | "CONFIRMED"
 
-type WsPass = "LEVEL_1" | "LEVEL_2"
+type WsPass = "LEVEL_1" | "LEVEL_2" | "PARTY_1" | "PARTY_2"
 
 const passNameToType: Record<string, WsPass> = {
   "Level 1": "LEVEL_1",
-  "Level 2": "LEVEL_2"
+  "Level 2": "LEVEL_2",
+  "Party pass 1": "PARTY_1",
+  "Party pass 2": "PARTY_2"
 }
 
-type Membership = "Member" | "Regular"
+type Membership = "Member" | "Student" | "Regular"
 
 interface EventParameters {
   maxImbalance: number,

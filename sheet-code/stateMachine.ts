@@ -15,6 +15,9 @@ function countTakenSpotsByRole(): TakenSpots {
  * role imbalance.
  */
 function wontBreakBalance(role: Role): boolean {
+    if (role === "Party") {
+        return true
+    }
     const params = getParameters()
     const { leaders, followers } = countTakenSpotsByRole()
     if (role === "Leader") {
