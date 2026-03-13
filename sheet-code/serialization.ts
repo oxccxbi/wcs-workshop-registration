@@ -1,6 +1,6 @@
 function parseAnswerRow(row: string[]): SignupRow | undefined {
     try {
-        const [timestamp, email, firstname, lastname, membership, classes, role, partner] = row;
+        const [timestamp, email, firstname, lastname, membership, pass, role, partner] = row;
 
         return {
             timestamp: timestamp as unknown as Date,
@@ -8,7 +8,7 @@ function parseAnswerRow(row: string[]): SignupRow | undefined {
             firstname: firstname,
             lastname: lastname,
             membership: membership,
-            classes: classes,
+            pass: pass,
             role: role,
             partner: partner
         };
@@ -20,10 +20,10 @@ function parseAnswerRow(row: string[]): SignupRow | undefined {
 
 function parseStateRow(row: any[]): StateRow | undefined {
     try {
-        const [timestamp, email, firstname, lastname, membership, classes, role, partner, price,
+        const [timestamp, email, firstname, lastname, membership, pass, role, partner, price,
             state, partnerConfirmed, paymentConfirmed, cancelled, note, reevaluate] = row;
         return {
-            timestamp, email, firstname, lastname, membership, classes: JSON.parse(classes), role, price,
+            timestamp, email, firstname, lastname, membership, pass, role, price,
             partner, partnerConfirmed, state, paymentConfirmed, cancelled, note, reevaluate
         }
     } catch (error) {
@@ -32,22 +32,22 @@ function parseStateRow(row: any[]): StateRow | undefined {
     }
 }
 
-function computePrice(membership: boolean, classes: WsClass[]) {
+function computePrice(membership: Membership, pass: WsPass): number {
     const MEMBER_PRICE = 100
     const REGULAR_PRICE = 150
-    const pricePerClass = membership ? MEMBER_PRICE : REGULAR_PRICE
-    return pricePerClass * classes.length
+    const pricePerClass = membership !== "Member" ? REGULAR_PRICE : MEMBER_PRICE
+    return  pass === "LEVEL_1" ? pricePerClass : pricePerClass*2
 }
 
 function signupToState(signup: SignupRow): StateRow {
-    const parseMembership = (rawMembership: string) => rawMembership.startsWith("Yes");
-    const parseClasses = (rawClasses: string) => [["Class 1", "CLASS_1" as WsClass], ["Class 2", "CLASS_2" as WsClass]]
-        .filter(([prefix, _]) => rawClasses.includes(prefix))
-        .map(([_, v]) => v as WsClass);
+    const parsePass = (rawPass: string) => {
+        if (!(rawPass in passNameToType)) throw new Error(`Invalid pass: ${rawPass}`);
+        return passNameToType[rawPass] as WsPass;
+    }
 
-    const classes = parseClasses(signup.classes)
+    const pass = parsePass(signup.pass)
     const role = signup.role as Role;
-    const membership = parseMembership(signup.membership);
+    const membership = signup.membership as Membership;
 
     return {
         timestamp: signup.timestamp.toISOString(),
@@ -55,10 +55,10 @@ function signupToState(signup: SignupRow): StateRow {
         firstname: signup.firstname,
         lastname: signup.lastname,
         membership: membership,
-        classes: classes,
+        pass: pass,
         role: role,
         partner: signup.partner,
-        price: computePrice(membership, classes),
+        price: computePrice(membership, pass),
         state: "NEW",
         partnerConfirmed: false,
         paymentConfirmed: false,
@@ -76,9 +76,9 @@ function insertCheckBoxes() {
 }
 
 function rowifyState(obj: StateRow) {
-    const { timestamp, email, firstname, lastname, membership, classes, role, partner, price,
+    const { timestamp, email, firstname, lastname, membership, pass, role, partner, price,
         state, partnerConfirmed, paymentConfirmed, note } = obj
-    const stateRow = [timestamp, email, firstname, lastname, membership, JSON.stringify(classes), role, partner, price,
+    const stateRow = [timestamp, email, firstname, lastname, membership, pass, role, partner, price,
         state, partnerConfirmed, paymentConfirmed, note]
     return stateRow
 }

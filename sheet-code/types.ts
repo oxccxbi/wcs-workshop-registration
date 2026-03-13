@@ -1,11 +1,11 @@
 interface SignupRow {
-  // Tidsmerke	E-postadresse	First name   Last name	Membership	Classes	Role	Partner's name (optional)
+  // Tidsmerke	E-postadresse	First name   Last name	Membership	Workshop pass (class/level/party)	Role	Partner's name (optional)
   timestamp: Date,
   email: string,
   firstname: string,
   lastname: string,
   membership: string,
-  classes: string,
+  pass: string,
   role: string,
   partner?: string,
 }
@@ -13,10 +13,10 @@ interface SignupRow {
 interface StateRow {
   timestamp: string
   email: string
-  firstname: string,
-  lastname: string,
-  membership: boolean
-  classes: WsClass[]
+  firstname: string
+  lastname: string
+  membership: Membership
+  pass: WsPass
   role: Role
   partner: string | undefined
   price: number
@@ -37,7 +37,14 @@ type State = "NEW"
   | "CANCELLED"
   | "CONFIRMED"
 
-type WsClass = "CLASS_1" | "CLASS_2"
+type WsPass = "LEVEL_1" | "LEVEL_2"
+
+const passNameToType: Record<string, WsPass> = {
+  "Level 1": "LEVEL_1",
+  "Level 2": "LEVEL_2"
+}
+
+type Membership = "Member" | "Regular"
 
 interface EventParameters {
   maxImbalance: number,
