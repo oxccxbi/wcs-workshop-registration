@@ -1,29 +1,64 @@
-function countTakenSpotsByRole(): TakenSpots {
+function countClaimedByRole(): TakenSpots {
+    const params = getParameters()
     const claimedSpots = getAllStates().map(stateToFsm).filter(s => s.claimsSpot)
     const numLeaders = claimedSpots.filter(s => s.stateRow.role === "Leader").length
     const numFollowers = claimedSpots.filter(s => s.stateRow.role === "Follower").length
-    const params = getParameters()
-
+    const numTotal = claimedSpots.length
     return {
         leaders: numLeaders + params.leaderBias,
         followers: numFollowers + params.followerBias,
+        total: numTotal + params.leaderBias + params.followerBias
     }
 }
 
-/**
- * Check if admitting one person of the given role will cause an unacceptable
- * role imbalance.
- */
+function countClaimedByRoleByPass(pass: WsPass): TakenSpots {
+    const params = getParameters()
+    const claimedPerPass = getAllStates().map(stateToFsm).filter(s => s.claimsSpot).filter(s => s.stateRow.pass === pass)
+    const numLeaders = claimedPerPass.filter(s => s.stateRow.role === "Leader").length
+    const numFollowers = claimedPerPass.filter(s => s.stateRow.role === "Follower").length
+    const numTotal = claimedPerPass.length
+    return {
+        leaders: numLeaders + params.leaderBias,
+        followers: numFollowers + params.followerBias,
+        total: numTotal + params.leaderBias + params.followerBias
+    }
+}
+
+function countFreeSpots(): number {
+    const params = getParameters()
+    const { leaders, followers, total } = countClaimedByRole()
+    return params.maxParticipants - total
+}
+
+function countFreePassSpots(pass: WsPass): number {
+    const params = getParameters()
+    const { leaders, followers, total } = countClaimedByRoleByPass(pass)
+    return params.maxParticipantsPerPass[pass] - total
+}
+
 function wontBreakBalance(role: Role): boolean {
     if (role === "Party") {
         return true
     }
     const params = getParameters()
-    const { leaders, followers } = countTakenSpotsByRole()
+    const { leaders, followers, total } = countClaimedByRole()
     if (role === "Leader") {
-        return (leaders + 1) < (followers * params.maxImbalance)
+        return leaders < params.noBalanceThreshold ? true : (leaders + 1) < (followers * params.maxImbalance)
     } else {
-        return (followers + 1) < (leaders * params.maxImbalance)
+        return followers < params.noBalanceThreshold ? true : (followers + 1) < (leaders * params.maxImbalance)
+    }
+}
+
+function wontBreakPassBalance(role: Role, pass: WsPass): boolean {
+    if (role === "Party") {
+        return wontBreakBalance(role)
+    }
+    const params = getParameters()
+    const { leaders, followers, total} = countClaimedByRoleByPass(pass)
+    if (role === "Leader") {
+        return leaders < params.noBalanceThreshold ? true : (leaders + 1) < (followers * params.maxImbalance)
+    } else {
+        return followers < params.noBalanceThreshold ? true : (followers + 1) < (leaders * params.maxImbalance)
     }
 }
 
@@ -31,8 +66,18 @@ function canAdmit(role: Role): boolean {
     Logger.log("checking if we can admit one more " + role)
     const freeSpots = countFreeSpots()
     const spotLeft = freeSpots > 0
-    Logger.log(`free spots: ${freeSpots}, wontBreakBalance: ${wontBreakBalance(role)}`)
-    return (spotLeft && wontBreakBalance(role))
+    const balanceOk = wontBreakBalance(role)
+    Logger.log(`free spots: ${freeSpots}, wontBreakBalance: ${balanceOk}`)
+    return (spotLeft && balanceOk)
+}
+
+function canAdmitPass(role: Role, pass: WsPass): boolean {
+    Logger.log("checking if we can admit one more " + role)
+    const freeSpots = Math.min(countFreePassSpots(pass), countFreeSpots())
+    const spotLeft = freeSpots > 0
+    const balanceOk = wontBreakPassBalance(role, pass)
+    Logger.log(`free spots: ${freeSpots}, wontBreakPassBalance: ${balanceOk}`)
+    return (spotLeft && balanceOk)
 }
 
 function evaluateNewState(fsm: NewState | WaitingListState): FsmState {
@@ -45,10 +90,10 @@ function evaluateNewState(fsm: NewState | WaitingListState): FsmState {
     if (mentionedPartners().includes(fsm.stateRow.firstname + " " + fsm.stateRow.lastname)) {
         return new PartnerSignupState(fsm.stateRow)
     }
-    else if (canAdmit(fsm.stateRow.role)) {
+    else if (canAdmitPass(fsm.stateRow.role, fsm.stateRow.pass)) {
         return new AwaitingPaymentState(fsm.stateRow)
     }
-    else if (fsm.stateRow.partner) {
+    else if (fsm.stateRow.partner && Math.min(countFreePassSpots(fsm.stateRow.pass), countFreeSpots()) > 1) {
         return new PartnerSignupState(fsm.stateRow)
     }
     else {

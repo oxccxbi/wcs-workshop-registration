@@ -51,13 +51,16 @@ type Membership = "Member" | "Student" | "Regular"
 interface EventParameters {
   maxImbalance: number,
   maxParticipants: number,
+  maxParticipantsPerPass: Record<WsPass, number>,
   leaderBias: number,
   followerBias: number,
+  noBalanceThreshold: number
 }
 
 interface TakenSpots {
   leaders: number,
   followers: number,
+  total: number
 }
 
 type ChangeEvent = "PAYMENT_RECEIVED"

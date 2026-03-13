@@ -23,25 +23,6 @@ function onNewRegistration() {
   processAll()
 }
 
-function countFreeSpots(): number {
-  const params = getParameters()
-  return params.maxParticipants - countClaimed()
-}
-
-/**
- * 
- * @returns number of claimed spots, including reserved ones
- */
-function countClaimed(): number {
-  const params = getParameters()
-  const reserved = params.followerBias + params.leaderBias
-
-  return reserved + getAllStates()
-    .map(stateToFsm)
-    .filter(s => s.claimsSpot)
-    .length
-}
-
 function getAllFsms(): FsmState[] {
   return getAllStates().map(stateToFsm)
 }
@@ -60,8 +41,10 @@ function getParameters(): EventParameters {
   return {
     maxImbalance: find("maxImbalance"),
     maxParticipants: find("maxParticipants"),
+    maxParticipantsPerPass: parseMaxParticipantsPerPass(find("maxParticipantsPerPass")),
     leaderBias: find("leaderBias"),
     followerBias: find("followerBias"),
+    noBalanceThreshold: find("noBalanceThreshold"),
   }
 }
 
