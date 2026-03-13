@@ -89,10 +89,10 @@ function installedEditHandler(changeEvent: GoogleAppsScript.Events.SheetsOnEdit)
     const column = changeEvent.range.getColumn()
     const rowNumber = changeEvent.range.getRowIndex()
     switch (column) {
-      case 10: return [rowNumber, "PARTNER_CONFIRMED"]
-      case 11: return [rowNumber, "PAYMENT_RECEIVED"]
-      case 12: return [rowNumber, "CANCELLED"]
-      case 14: return [rowNumber, "EVALUATE"]
+      case 11: return [rowNumber, "PARTNER_CONFIRMED"]
+      case 12: return [rowNumber, "PAYMENT_RECEIVED"]
+      case 13: return [rowNumber, "CANCELLED"]
+      case 15: return [rowNumber, "EVALUATE"]
     }
   }
 

@@ -1,11 +1,12 @@
 function parseAnswerRow(row: string[]): SignupRow | undefined {
     try {
-        const [timestamp, email, name, membership, classes, role, partner] = row;
+        const [timestamp, email, firstname, lastname, membership, classes, role, partner] = row;
 
         return {
             timestamp: timestamp as unknown as Date,
             email: email,
-            name: name,
+            firstname: firstname,
+            lastname: lastname,
             membership: membership,
             classes: classes,
             role: role,
@@ -19,10 +20,10 @@ function parseAnswerRow(row: string[]): SignupRow | undefined {
 
 function parseStateRow(row: any[]): StateRow | undefined {
     try {
-        const [timestamp, email, name, membership, classes, role, partner, price,
+        const [timestamp, email, firstname, lastname, membership, classes, role, partner, price,
             state, partnerConfirmed, paymentConfirmed, cancelled, note, reevaluate] = row;
         return {
-            timestamp, email, name, membership, classes: JSON.parse(classes), role, price,
+            timestamp, email, firstname, lastname, membership, classes: JSON.parse(classes), role, price,
             partner, partnerConfirmed, state, paymentConfirmed, cancelled, note, reevaluate
         }
     } catch (error) {
@@ -51,7 +52,8 @@ function signupToState(signup: SignupRow): StateRow {
     return {
         timestamp: signup.timestamp.toISOString(),
         email: signup.email,
-        name: signup.name,
+        firstname: signup.firstname,
+        lastname: signup.lastname,
         membership: membership,
         classes: classes,
         role: role,
@@ -69,14 +71,14 @@ function signupToState(signup: SignupRow): StateRow {
 function insertCheckBoxes() {
     const sheet = sheets.state()
     const numRows = sheet.getDataRange().getNumRows()
-    sheet.getRange(`J2:L${numRows}`).insertCheckboxes()
-    sheet.getRange(`N2:N${numRows}`).insertCheckboxes()
+    sheet.getRange(`K2:M${numRows}`).insertCheckboxes()
+    sheet.getRange(`O2:O${numRows}`).insertCheckboxes()
 }
 
 function rowifyState(obj: StateRow) {
-    const { timestamp, email, name, membership, classes, role, partner, price,
+    const { timestamp, email, firstname, lastname, membership, classes, role, partner, price,
         state, partnerConfirmed, paymentConfirmed, note } = obj
-    const stateRow = [timestamp, email, name, membership, JSON.stringify(classes), role, partner, price,
+    const stateRow = [timestamp, email, firstname, lastname, membership, JSON.stringify(classes), role, partner, price,
         state, partnerConfirmed, paymentConfirmed, note]
     return stateRow
 }
@@ -97,7 +99,7 @@ function writeStateRow(obj: StateRow) {
         insertCheckBoxes()
     } else {
         const i = rowNumber + 1
-        stateSheet.getRange(`A${i}:L${i}`).setValues([stateRow]);
+        stateSheet.getRange(`A${i}:M${i}`).setValues([stateRow]);
     }
 }
 

@@ -1,8 +1,9 @@
 interface SignupRow {
-  // Tidsmerke	E-postadresse	Full name	Membership	Classes	Role	Partner's name (optional)
+  // Tidsmerke	E-postadresse	First name   Last name	Membership	Classes	Role	Partner's name (optional)
   timestamp: Date,
   email: string,
-  name: string,
+  firstname: string,
+  lastname: string,
   membership: string,
   classes: string,
   role: string,
@@ -12,7 +13,8 @@ interface SignupRow {
 interface StateRow {
   timestamp: string
   email: string
-  name: string
+  firstname: string,
+  lastname: string,
   membership: boolean
   classes: WsClass[]
   role: Role
