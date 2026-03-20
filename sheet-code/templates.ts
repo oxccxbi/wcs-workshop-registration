@@ -23,17 +23,16 @@ ${body}`)
 }
 
 
-const emailSender = "NTNUI Dance WCS"
+/** Vipps number (and channel) */
+const vippsNumber = "129012 (NTNUI Dans) -> Workshop WCS"
 
 
-function emailTitle(type: string) {
-  return `NTNUI Dance WCS Workshop Registration - ${type}`
-}
+/** Email sender name */
+const emailSender = "NTNUI Dans WCS"
 
 
-const emailClosure = `
-Best regards,
-${emailSender}`
+/** Subject line for emails */
+const emailTitle = (type: string) => `NTNUI Dans WCS Workshop Registration - ${type}`
 
 
 /**  Body text for waiting list */
@@ -98,8 +97,14 @@ To secure your spot, please complete your registration by making the payment wit
 
 We prefer payment by Vipps. If you don't have the option to pay by Vipps, contact us and we can arrange payment by card or cash during the workshop.
 
-Vipps: 129012 (NTNUI Dans) -> Workshop WCS
+Vipps: ${vippsNumber}
 
 Price: ${price} NOK
 
 After paying, please reply to this email with a screenshot of the Vipps receipt. If screenshots don't work in Vipps, this receipt can also be exported with the "Share" button (upper right corner).`
+
+
+/** Email closure */
+const emailClosure = `
+Best regards,
+${emailSender}`
